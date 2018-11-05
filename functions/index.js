@@ -43,24 +43,35 @@ exports.getUserMenus = functions.https.onRequest((req, res) => {
 })
 
 exports.getMenu = functions.https.onRequest((req, res) => {
-    let params = req.params[0].slice(1).split('/')
-    let name = params[0]
-    let address = params[1]
-    admin.database().ref('dummyRestaurants/').orderByKey().equalTo(`${name}`).on('value', (snapshot)=>{
-        for( name in snapshot.val()  ){
-            for( menuAddress in snapshot.val()[name] ){
-                if (address == menuAddress){
-                    var newMenu = {
-                        name: name,
-                        address: address,
-                        menu: snapshot.val()[name][menuAddress].menu
-                    }
-                    res.send({menu: newMenu})
-                }
-            }
+    let params = req.params[0].slice(1)
+    admin.database().ref('restaurants/').orderByKey().equalTo(`${params}`).on('value', (snapshot)=>{
+        if (snapshot.val()){
+            res.send(snapshot.val())
+
+        } else {
+            res.send({error: "No Menu..."})
         }
     })
 })
+// exports.getMenu = functions.https.onRequest((req, res) => {
+//     let params = req.params[0].slice(1).split('/')
+//     let name = params[0]
+//     let address = params[1]
+//     admin.database().ref('dummyRestaurants/').orderByKey().equalTo(`${name}`).on('value', (snapshot)=>{
+//         for( name in snapshot.val()  ){
+//             for( menuAddress in snapshot.val()[name] ){
+//                 if (address == menuAddress){
+//                     var newMenu = {
+//                         name: name,
+//                         address: address,
+//                         menu: snapshot.val()[name][menuAddress].menu
+//                     }
+//                     res.send({menu: newMenu})
+//                 }
+//             }
+//         }
+//     })
+// })
 exports.getUserData = functions.https.onRequest((req, res) => {
     const userID = 12461241;
     // let userID = req.params[0].slice(1)
