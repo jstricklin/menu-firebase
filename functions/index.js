@@ -26,7 +26,7 @@ admin.initializeApp();
 
 // })
 exports.getUserMenus = functions.https.onRequest((req, res) => {
-    admin.database().ref('dummyRestaurants/').on('value', function(snapshot){
+    admin.database().ref('Restaurants/').on('value', function(snapshot){
         let menuArr = []
         for(let restaurant in snapshot.val()){
             Object.keys(snapshot.val()[restaurant]).map(addy => {
@@ -42,12 +42,6 @@ exports.getUserMenus = functions.https.onRequest((req, res) => {
     })
 })
 
-// exports.getMenu = functions.https.onRequest((req, res) => {
-//     let menuID = req.params[0].slice(1)
-//     admin.database().ref('restaurants/').orderByKey().equalTo(menuID).on('value', function(snapshot){
-//         res.send({menu: snapshot.val()})
-//     })
-// })
 exports.getMenu = functions.https.onRequest((req, res) => {
     let params = req.params[0].slice(1).split('/')
     let name = params[0]
@@ -64,6 +58,30 @@ exports.getMenu = functions.https.onRequest((req, res) => {
                     res.send({menu: newMenu})
                 }
             }
+        }
+    })
+})
+exports.getUserData = functions.https.onRequest((req, res) => {
+    const userID = 12461241;
+    // let userID = req.params[0].slice(1)
+    let userData = {  }
+    admin.database().ref('users').orderByKey().equalTo(`${userID}`).on('value', (snapshot) => {
+        userData = Object.keys(snapshot.val()).map(key => {
+            return snapshot.val()[key];
+        })[0]
+        // userData = Object.values(snapshot.val())[0]
+        switch(userData.type){
+            case "registered" :
+                admin.database().ref('userProfiles').orderByKey().equalTo(`${userData.profile}`).on('value', ((snapshot) => {
+                    userData.userID = userID
+                    userData.profile = Object.keys(snapshot.val()).map(key => {
+                        return snapshot.val()[key]
+                    })[0]
+                    // userData.profile = Object.values(snapshot.val())[0]
+                    res.send({data: userData})
+                }))
+                break
+                default : res.send("unregistered")
         }
     })
 })
